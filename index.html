@@ -515,105 +515,6 @@
             box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3);
         }
 
-        .pause-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        .pause-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: pauseSlideIn 0.4s ease-out;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        @keyframes pauseSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .pause-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: pausePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pausePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .pause-title {
-            color: #2d3748;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .pause-message {
-            color: #4a5568;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .pause-time {
-            background: #f7fafc;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-            border-left: 4px solid #4299e1;
-        }
-
-        .pause-time-label {
-            color: #4a5568;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        .pause-time-value {
-            color: #2d3748;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .btn-resume {
-            background: linear-gradient(45deg, #48bb78, #38a169);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-        }
-
-        .btn-resume:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -839,23 +740,6 @@
             </div>
         </div>
 
-        <!-- Pause Overlay -->
-        <div id="pauseOverlay" class="pause-overlay hidden">
-            <div class="pause-content">
-                <div class="pause-icon">⏸️</div>
-                <h3 class="pause-title">Pembelajaran Dijeda</h3>
-                <p class="pause-message">
-                    Timer pembelajaran telah dihentikan sementara karena kamu beralih ke tab atau aplikasi lain.
-                </p>
-                <div class="pause-time">
-                    <div class="pause-time-label">Waktu Belajar Saat Ini:</div>
-                    <div class="pause-time-value" id="pausedTimeDisplay">00:00:00</div>
-                </div>
-                <button class="btn-resume" onclick="resumeLearning()">
-                    ▶️ Lanjutkan Belajar
-                </button>
-            </div>
-        </div>
 
     </div>
 
@@ -993,28 +877,20 @@
             if (document.hidden) {
                 studentData.isActive = false;
                 pauseTimer();
-                showPauseOverlay();
             } else {
-                // Don't auto-resume, wait for user to click resume button
-                if (document.getElementById('pauseOverlay').classList.contains('hidden')) {
-                    studentData.isActive = true;
-                    resumeTimer();
-                }
+                studentData.isActive = true;
+                resumeTimer();
             }
         }
 
         function handleWindowBlur() {
             studentData.isActive = false;
             pauseTimer();
-            showPauseOverlay();
         }
 
         function handleWindowFocus() {
-            // Don't auto-resume, wait for user to click resume button
-            if (document.getElementById('pauseOverlay').classList.contains('hidden')) {
-                studentData.isActive = true;
-                resumeTimer();
-            }
+            studentData.isActive = true;
+            resumeTimer();
         }
 
         function startTimer() {
@@ -1404,39 +1280,6 @@
             });
         }
 
-        function showPauseOverlay() {
-            // Only show pause overlay if we're in the learning phase (not welcome or assessment)
-            if (!document.getElementById('learningScreen').classList.contains('hidden')) {
-                // Update the paused time display
-                const totalTime = studentData.totalTime + (studentData.startTime ? Date.now() - studentData.startTime : 0);
-                updatePausedTimeDisplay(totalTime);
-                
-                // Pause all videos
-                pauseAllVideos();
-                
-                // Show overlay
-                document.getElementById('pauseOverlay').classList.remove('hidden');
-            }
-        }
-
-        function updatePausedTimeDisplay(totalMs) {
-            const hours = Math.floor(totalMs / 3600000);
-            const minutes = Math.floor((totalMs % 3600000) / 60000);
-            const seconds = Math.floor((totalMs % 60000) / 1000);
-            
-            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            document.getElementById('pausedTimeDisplay').textContent = timeString;
-        }
-
-        function resumeLearning() {
-            // Hide pause overlay
-            document.getElementById('pauseOverlay').classList.add('hidden');
-            
-            // Resume timer
-            studentData.isActive = true;
-            resumeTimer();
-        }
-
 
 
         // Save data before page unload
@@ -1446,5 +1289,5 @@
             localStorage.setItem('studentData', JSON.stringify(studentData));
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ffa9185108f4ec',t:'MTc2MDcwMjY4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ffab0a97bd4f19',t:'MTc2MDcwMjc2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
